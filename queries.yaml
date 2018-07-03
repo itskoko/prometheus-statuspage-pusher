@@ -1,0 +1,9 @@
+0fly17tyz248: |
+  avg(
+    rate(
+      http_request_duration_microseconds{
+        quantile="0.5",
+        job="kubernetes-nodes"
+      }[5m]
+    )
+  )
