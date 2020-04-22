@@ -28,7 +28,7 @@ type queryConfig map[string]string
 var (
 	prometheusURL   = flag.String("pu", "http://localhost:9090", "URL of Prometheus server")
 	statusPageURL   = flag.String("su", "https://api.statuspage.io", "URL of Statuspage API")
-	statusPageToken = flag.String("st", "", "Statuspage Oauth token")
+	statusPageToken = flag.String("st", os.Getenv("STATUSPAGE_TOKEN"), "Statuspage Oauth token")
 	statusPageID    = flag.String("si", "", "Statuspage page ID")
 	queryConfigFile = flag.String("c", "queries.yaml", "Query config file")
 	metricInterval  = flag.Duration("i", 30*time.Second, "Metric push interval")
@@ -61,10 +61,15 @@ func main() {
 	for {
 		for metricID, query := range qConfig {
 			ts := time.Now()
-			resp, err := api.Query(context.Background(), query, ts)
+			resp, warnings, err := api.Query(context.Background(), query, ts)
 			if err != nil {
 				level.Error(logger).Log("msg", "Couldn't query Prometheus", "error", err.Error())
 				continue
+			}
+			if len(warnings) > 0 {
+				for _, warning := range warnings {
+					level.Warn(logger).Log("msg", "Prometheus query warning", "warning", warning)
+				}
 			}
 			vec := resp.(model.Vector)
 			if l := vec.Len(); l != 1 {
