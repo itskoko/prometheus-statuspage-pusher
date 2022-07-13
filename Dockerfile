@@ -1,14 +1,9 @@
-FROM golang:1.10
-ENV IPATH=github.com/itskoko/prometheus-status-pusher
-RUN go get -u github.com/golang/dep/cmd/dep
-WORKDIR $GOPATH/src/$IPATH
-
-ADD Gopkg.* ./
-RUN dep ensure --vendor-only
-
+FROM golang:1.18
+WORKDIR /build
 ADD . .
-RUN go test ./... && CGO_ENABLED=0 go install ./...
+RUN go mod download
+RUN CGO_ENABLED=0 go build -o /prometheus-status-pusher
 
 FROM busybox
-COPY --from=0 /go/bin/* /usr/local/bin/
+COPY --from=0 /prometheus-status-pusher /usr/local/bin/
 ENTRYPOINT [ "prometheus-status-pusher" ]
