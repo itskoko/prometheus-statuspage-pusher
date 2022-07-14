@@ -2,6 +2,7 @@
 set -eo pipefail
 
 echo "~~~ install golangci-lint"
+mkdir -p bin
 if ! command -v golangci-lint >/dev/null 2>&1; then
 	if command -v brew >/dev/null 2>&1; then
 		brew install golangci/tap/golangci-lint
