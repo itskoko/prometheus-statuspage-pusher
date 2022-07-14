@@ -2,6 +2,9 @@
 export GOPATH:=$(shell go env GOPATH)
 export GO111MODULE:=on
 
+# fix PATH
+export PATH:=$(GOPATH)/bin:$(PATH)
+
 # use gsed if available, sed otherwise
 SED ?= $(shell which gsed || which sed)
 
