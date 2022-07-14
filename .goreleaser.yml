@@ -1,0 +1,20 @@
+builds:
+- id: prometheus-statuspage-pusher
+  binary: prometheus-statuspage-pusher
+  main: ./main.go
+  env:
+  - CGO_ENABLED=0
+  goarch:
+  - amd64
+  goos:
+  - linux
+dockers:
+- dockerfile: Dockerfile
+  ids:
+  - prometheus-statuspage-pusher
+  build_flag_templates:
+  - "--label=org.label-schema.schema-version=1.0"
+  - "--label=org.label-schema.version={{.Version}}"
+  - "--label=org.label-schema.name={{.ProjectName}}"
+  image_templates:
+  - "gcr.io/labs-app-mdm-production/prometheus-statuspage-pusher:{{ .Tag }}"

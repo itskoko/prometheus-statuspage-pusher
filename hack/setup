@@ -1,0 +1,14 @@
+#!/bin/bash
+set -eo pipefail
+
+echo "~~~ install golangci-lint"
+if ! command -v golangci-lint >/dev/null 2>&1; then
+	if command -v brew >/dev/null 2>&1; then
+		brew install golangci/tap/golangci-lint
+	else
+		curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s v1.42.1
+	fi
+fi
+
+echo "~~~ go mod tidy"
+go mod tidy

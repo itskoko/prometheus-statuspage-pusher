@@ -1,0 +1,28 @@
+#!/bin/bash
+set -eo pipefail
+test -n "$BUILDKITE_TAG" || {
+	echo "not running on buildkite" >&2
+	exit 1
+}
+
+echo "~~~ :git: checking out tag $BUILDKITE_TAG"
+git fetch origin
+git fetch origin --tags
+git checkout "tags/$BUILDKITE_TAG"
+
+make setup generate manifests
+
+echo "~~~ :shipit: proxy docker images"
+function proxy_img() {
+	docker pull $1
+	docker tag $1 "gcr.io/labs-app-mdm-production/prometheus-statuspage-pusher/$2"
+	docker push "gcr.io/labs-app-mdm-production/prometheus-statuspage-pusher/$2"
+}
+
+proxy_img google/cloud-sdk:alpine cloud-sdk:alpine
+proxy_img gcr.io/kaniko-project/executor:v0.13.0 kaniko:v0.13.0
+proxy_img alpine/git:v2.26.2 git:v2.26.2
+proxy_img bitnami/kubectl kubectl
+
+echo "~~~ :shipit: release"
+curl -sL https://git.io/goreleaser | bash

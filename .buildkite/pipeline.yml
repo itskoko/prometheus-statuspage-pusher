@@ -1,0 +1,19 @@
+steps:
+  - label: ":golang: ci"
+    command: make setup ci
+    agents:
+      queue: "go-large"
+      dind: true
+    timeout_in_minutes: 10
+    retry:
+      automatic:
+        - exit_status: '*'
+          limit: 1
+  - wait
+  - label: ":shipit: release"
+    branches: "v*.*.*"
+    command: ./hack/buildkite-release
+    agents:
+      queue: "go-large"
+      dind: true
+    timeout_in_minutes: 10
